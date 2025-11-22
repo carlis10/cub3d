@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   error.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
+/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 14:22:00 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:38:45 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/22 14:59:33 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "include/error.h"
+#include "../include/error.h"
 
 static const char *g_err_strings[] = {
 	"Success",
@@ -35,7 +35,7 @@ static const char *g_err_strings[] = {
 	"Internal error"
 };
 
-int set_error(t_error_code code, const char *detail, t_game *game)
+int	set_error(t_error_code code, const char *detail, t_game *game)
 {
 	(void)game;
 	if (code <= ERR_NONE || code > ERR_INTERNAL)
@@ -44,7 +44,7 @@ int set_error(t_error_code code, const char *detail, t_game *game)
 	return (-1);
 }
 
-void print_error(t_error_code code, const char *detail)
+void	print_error(t_error_code code, const char *detail)
 {
 	if (code <= ERR_NONE || code > ERR_INTERNAL)
 		code = ERR_INTERNAL;
@@ -54,7 +54,7 @@ void print_error(t_error_code code, const char *detail)
 	fprintf(stderr, "\n");
 }
 
-void error_exit(t_error_code code, const char *detail, t_game *game)
+void	error_exit(t_error_code code, const char *detail, t_game *game)
 {
 	print_error(code, detail);
 }

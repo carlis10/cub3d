@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -Werror -ldl -lglfw -lm -lpthread -lGL
 
 RM = rm -f
 
-SRCS =  main.c render/draw.c render/input.c render/raycast.c render/textures.c
+SRCS =  main.c render/draw.c render/input.c render/raycast.c render/textures.c render/draw_text_aux.c
 
 INCLUDE = -I ./MLX42/include     ./MLX42/build/libmlx42.a include/cub3d.h
 

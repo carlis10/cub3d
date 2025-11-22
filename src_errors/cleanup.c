@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   cleanup.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
+/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 14:23:46 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:38:50 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/22 14:42:00 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include "error.h"
+#include "../include/error.h"
 
 void	free_map(char **map)
 {

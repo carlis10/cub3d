@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   safe_alloc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
+/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 14:24:09 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:37:36 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/22 14:59:17 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include "error.h"
+#include "../include/error.h"
 
 void	*xmalloc(size_t size, t_game *game)
 {
