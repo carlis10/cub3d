@@ -6,85 +6,119 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:33:28 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/17 16:17:03 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/22 13:43:05 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
-void cast_ray(t_game *g, int x)
+void	draw_text(t_game *g, int x)
 {
-	double cameraX = 2 * x / (double)WIDTH - 1;
-	double rayDirX = g->p.dirX + g->p.planeX * cameraX;
-	double rayDirY = g->p.dirY + g->p.planeY * cameraX;
-	int mapX = (int)g->p.posX;
-	int mapY = (int)g->p.posY;
-	double sideDistX, sideDistY;
-	double deltaX = (rayDirX == 0.0) ? 1e30 : fabs(1.0 / rayDirX);
-	double deltaY = (rayDirY == 0.0) ? 1e30 : fabs(1.0 / rayDirY);
-	int stepX, stepY, hit = 0, side;
+	if (g->r.side == 0)
+		g->line.dist = d_aux(g->r.m_x, g->p.pos_x, g->r.step_x, g->r.ray_dir_x);
+	else
+		g->line.dist = d_aux(g->r.m_y, g->p.pos_y, g->r.step_y, g->r.ray_dir_y);
+	if (!isfinite(g->line.dist) || g->line.dist <= 0.0)
+		g->line.dist = 1e-6;
+	if (g->r.side == 0)
+		g->line.wall_x = g->p.pos_y + g->line.dist * g->r.ray_dir_y;
+	else
+		g->line.wall_x = g->p.pos_x + g->line.dist * g->r.ray_dir_x;
+	g->line.wall_x -= floor(g->line.wall_x);
+	draw_wall(g, x);
+	g->line.line_height = (int)(HEIGHT / g->line.dist);
+	g->line.draw_end = g->line.line_height / 2 + HEIGHT / 2;
+	if (g->line.draw_end >= HEIGHT)
+		g->line.draw_end = HEIGHT - 1;
+	draw_floor_sky(g, x);
+}
 
-	if (rayDirX < 0) { stepX = -1; sideDistX = (g->p.posX - mapX) * deltaX; }
-	else { stepX = 1; sideDistX = (mapX + 1.0 - g->p.posX) * deltaX; }
-	if (rayDirY < 0) { stepY = -1; sideDistY = (g->p.posY - mapY) * deltaY; }
-	else { stepY = 1; sideDistY = (mapY + 1.0 - g->p.posY) * deltaY; }
-
-	/* DDA con protección de límites */
-	while (!hit)
+void	draw_first(t_game *g)
+{
+	if (g->r.ray_dir_x < 0)
 	{
-		if (sideDistX < sideDistY)
+		g->r.step_x = -1;
+		g->r.side_dist_x = (g->p.pos_x - g->r.m_x) * g->r.delta_x;
+	}
+	else
+	{
+		g->r.step_x = 1;
+		g->r.side_dist_x = (g->r.m_x + 1.0 - g->p.pos_x) * g->r.delta_x;
+	}
+	if (g->r.ray_dir_y < 0)
+	{
+		g->r.step_y = -1;
+		g->r.side_dist_y = (g->p.pos_y - g->r.m_y) * g->r.delta_y;
+	}
+	else
+	{
+		g->r.step_y = 1;
+		g->r.side_dist_y = (g->r.m_y + 1.0 - g->p.pos_y) * g->r.delta_y;
+	}
+}
+
+int	dda_loop(t_game *g)
+{
+	while (!g->r.hit)
+	{
+		if (g->r.side_dist_x < g->r.side_dist_y)
 		{
-			sideDistX += deltaX;
-			mapX += stepX;
-			side = 0;
+			g->r.side_dist_x += g->r.delta_x;
+			g->r.m_x += g->r.step_x;
+			g->r.side = 0;
 		}
 		else
 		{
-			sideDistY += deltaY;
-			mapY += stepY;
-			side = 1;
+			g->r.side_dist_y += g->r.delta_y;
+			g->r.m_y += g->r.step_y;
+			g->r.side = 1;
 		}
-		/* proteger acceso al mapa */
-		if (mapX < 0 || mapX >= MAP_W || mapY < 0 || mapY >= MAP_H)
+		if (g->r.m_x < 0 || g->r.m_x >= M_W || g->r.m_y < 0 || g->r.m_y >= M_H)
 		{
-			/* rayo salió del mapa: no dibujamos pared */
-			hit = 0;
-			break;
+			g->r.hit = 0;
+			break ;
 		}
-		if (g->map[mapY][mapX] > 0)
-			hit = 1;
+		if (g->map[g->r.m_y][g->r.m_x] > 0)
+			g->r.hit = 1;
 	}
-
-	/* Si no hubo impacto válido, salimos sin dibujar muro (pero podemos hacer floor) */
-	if (!hit)
-		return;
-
-	/* distancia perpendicular (proteger divisiones) */
-	double dist;
-	if (side == 0)
-		dist = (rayDirX == 0.0) ? 1e-6
-			: (mapX - g->p.posX + (1 - stepX) / 2.0) / rayDirX;
-	else
-		dist = (rayDirY == 0.0) ? 1e-6
-			: (mapY - g->p.posY + (1 - stepY) / 2.0) / rayDirY;
-	if (!isfinite(dist) || dist <= 0.0)
-		dist = 1e-6;
-
-	double wallX = (side == 0) ? g->p.posY + dist * rayDirY
-							  : g->p.posX + dist * rayDirX;
-	wallX -= floor(wallX);
-
-	draw_wall(g, x, dist, side, wallX, rayDirX, rayDirY);
-	/* calculamos drawEnd como lo hacía antes pero con protección */
-	int lineHeight = (int)(HEIGHT / dist);
-	int drawEnd = lineHeight / 2 + HEIGHT / 2;
-	if (drawEnd >= HEIGHT) drawEnd = HEIGHT - 1;
-	draw_floor_sky(g, x, drawEnd, dist);
+	if (!g->r.hit)
+		return (1);
+	return (0);
 }
 
-void draw_scene(t_game *g)
+void	cast_ray(t_game *g, int x)
 {
+	g->r.camerax = 2 * x / (double)WIDTH - 1;
+	g->r.ray_dir_x = g->p.dir_x + g->p.plane_x * g->r.camerax;
+	g->r.ray_dir_y = g->p.dir_y + g->p.plane_y * g->r.camerax;
+	g->r.m_x = (int)g->p.pos_x;
+	g->r.m_y = (int)g->p.pos_y;
+	if (g->r.ray_dir_x == 0.0)
+		g->r.delta_x = 1e30;
+	else
+		g->r.delta_x = fabs(1.0 / g->r.ray_dir_x);
+	if (g->r.ray_dir_y == 0.0)
+		g->r.delta_y = 1e30;
+	else
+		g->r.delta_y = fabs(1.0 / g->r.ray_dir_y);
+	g->r.step_x = 0;
+	g->r.step_y = 0;
+	g->r.hit = 0;
+	draw_first(g);
+	if (dda_loop(g) != 0)
+		return ;
+	draw_text(g, x);
+}
+
+void	draw_scene(t_game *g)
+{
+	int	x;
+
+	x = 0;
 	draw_background(g);
-	for (int x = 0; x < WIDTH; x++)
+	while (x < WIDTH)
+	{
 		cast_ray(g, x);
+		x++;
+	}
 }
