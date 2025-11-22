@@ -6,7 +6,7 @@
 /*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:58:42 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 20:12:07 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/23 00:38:54 by javierzarag      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,45 +17,42 @@
 #include "include/cub3d.h"
 #include "include/error.h"
 
-int parse_identifier_line(char *line, t_game *game, int *have_tex,
-						  int *have_floor, int *have_ceil);
-int extract_map_block(char **file_lines, int nlines, int start_index,
-					  char ***out_lines, int *out_h, int *out_w,
-					  t_game *game);
-int validate_map_block(char **map_lines, int map_h, int map_w, t_game *game);
-
 static void	free_lines(char **lines, int n)
 {
-	int i;
+	int	i;
 
 	if (!lines)
 		return ;
-	for (i = 0; i < n; ++i)
+	i = 0;
+	while (i < n)
 	{
 		free(lines[i]);
 		lines[i] = NULL;
+		i++;
 	}
 	free(lines);
 }
 
 static void	clear_tex_paths(t_game *game)
 {
-	int i;
+	int	i;
 
 	if (!game)
 		return ;
-	for (i = 0; i < 4; ++i)
+	i = 0;
+	while (i < 4)
 	{
 		if (game->tex_path[i])
 		{
 			free(game->tex_path[i]);
 			game->tex_path[i] = NULL;
 		}
+		i++;
 	}
 }
 
 static int	read_all_lines(const char *filename, char ***out_lines,
-						   int *out_count, t_game *game)
+		int *out_count, t_game *game)
 {
 	FILE	*f;
 	char	*line;
@@ -75,25 +72,34 @@ static int	read_all_lines(const char *filename, char ***out_lines,
 	{
 		if (nread > 0 && line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
-		char *dup = strdup(line);
-		if (!dup)
 		{
-			free(line);
-			fclose(f);
-			free_lines(arr, count);
-			return (set_error(ERR_MALLOC, "reading file", game));
+			char *dup;
+
+			dup = strdup(line);
+			if (!dup)
+			{
+				free(line);
+				fclose(f);
+				free_lines(arr, count);
+				return (set_error(ERR_MALLOC, "reading file", game));
+			}
+			{
+				char **tmp;
+
+				tmp = realloc(arr, (count + 1) * sizeof(char *));
+				if (!tmp)
+				{
+					free(dup);
+					free(line);
+					fclose(f);
+					free_lines(arr, count);
+					return (set_error(ERR_MALLOC, "reading file", game));
+				}
+				arr = tmp;
+				arr[count] = dup;
+				count++;
+			}
 		}
-		char **tmp = realloc(arr, (count + 1) * sizeof(char *));
-		if (!tmp)
-		{
-			free(dup);
-			free(line);
-			fclose(f);
-			free_lines(arr, count);
-			return (set_error(ERR_MALLOC, "reading file", game));
-		}
-		arr = tmp;
-		arr[count++] = dup;
 	}
 	free(line);
 	fclose(f);
@@ -109,7 +115,7 @@ static int	read_all_lines(const char *filename, char ***out_lines,
 
 static int	has_cub_ext(const char *name)
 {
-	size_t n;
+	size_t	n;
 
 	if (!name)
 		return (0);
@@ -119,15 +125,152 @@ static int	has_cub_ext(const char *name)
 	return (strcmp(name + n - 4, ".cub") == 0);
 }
 
+static void	free_map_lines(char **map, int h)
+{
+	int i;
+
+	if (!map)
+		return ;
+	i = 0;
+	while (i < h)
+	{
+		free(map[i]);
+		map[i] = NULL;
+		i++;
+	}
+	free(map);
+}
+
+/*
+** Ensure the game's map grid is initialized to walls (1).
+*/
+static void	set_map_all_ones(t_game *game)
+{
+	int	y;
+	int	x;
+
+	y = 0;
+	while (y < MAP_H)
+	{
+		x = 0;
+		while (x < MAP_W)
+		{
+			game->map[y][x] = 1;
+			x++;
+		}
+		y++;
+	}
+}
+
+/*
+** Place player values based on orientation character.
+*/
+static void	place_player_from_char(t_game *game, char c, int x, int y)
+{
+	game->p.posX = (double)x + 0.5;
+	game->p.posY = (double)y + 0.5;
+	if (c == 'N')
+	{
+		game->p.dirX = -1;
+		game->p.dirY = 0;
+		game->p.planeX = 0;
+		game->p.planeY = 0.66;
+	}
+	else if (c == 'S')
+	{
+		game->p.dirX = 1;
+		game->p.dirY = 0;
+		game->p.planeX = 0;
+		game->p.planeY = -0.66;
+	}
+	else if (c == 'W')
+	{
+		game->p.dirX = 0;
+		game->p.dirY = -1;
+		game->p.planeX = -0.66;
+		game->p.planeY = 0;
+	}
+	else if (c == 'E')
+	{
+		game->p.dirX = 0;
+		game->p.dirY = 1;
+		game->p.planeX = 0.66;
+		game->p.planeY = 0;
+	}
+}
+
+static int	load_map_into_grid(char **map_lines, int map_h, int map_w,
+		t_game *game)
+{
+	int	y;
+	int	x;
+	int	len;
+	char	c;
+
+	y = 0;
+	while (y < MAP_H)
+	{
+		x = 0;
+		while (x < MAP_W)
+		{
+			game->map[y][x] = 1;
+			x++;
+		}
+		y++;
+	}
+	y = 0;
+	while (y < map_h)
+	{
+		x = 0;
+		while (x < map_w)
+		{
+			len = (int)strlen(map_lines[y]);
+			if (x < len)
+				c = map_lines[y][x];
+			else
+				c = ' ';
+			if (c == '1')
+				game->map[y][x] = 1;
+			else if (c == '0')
+				game->map[y][x] = 0;
+			else if (c == ' ')
+				game->map[y][x] = 1;
+			else if (c == 'N' || c == 'S' || c == 'E' || c == 'W')
+			{
+				game->map[y][x] = 0;
+				place_player_from_char(game, c, x, y);
+			}
+			else
+				game->map[y][x] = 1;
+			x++;
+		}
+		y++;
+	}
+	return (0);
+}
+
+static int	cleanup_and_err(char **lines, int nlines, char **map_lines,
+		int map_h, t_game *game)
+{
+	if (map_lines)
+		free_map_lines(map_lines, map_h);
+	clear_tex_paths(game);
+	free_lines(lines, nlines);
+	return (-1);
+}
+
 int	parse_file(const char *filename, t_game *game)
 {
 	char	**lines;
 	int		nlines;
 	int		res;
 	int		have_tex[4] = {0, 0, 0, 0};
-	int		have_floor = 0;
-	int		have_ceil = 0;
+	int		have_floor;
+	int		have_ceil;
 	int		i;
+	char	**map_lines;
+	int		map_h;
+	int		map_w;
 
 	if (!has_cub_ext(filename))
 		return (set_error(ERR_BAD_EXTENSION, filename, game));
@@ -136,19 +279,19 @@ int	parse_file(const char *filename, t_game *game)
 	res = read_all_lines(filename, &lines, &nlines, game);
 	if (res != 0)
 		return (-1);
-
-	
+	have_floor = 0;
+	have_ceil = 0;
 	i = 0;
 	while (i < nlines)
 	{
-		int r = parse_identifier_line(lines[i], game, have_tex, &have_floor,
-									  &have_ceil);
-		if (r == 0)
+		res = parse_identifier_line(lines[i], game, have_tex,
+				&have_floor, &have_ceil);
+		if (res == 0)
 		{
-			++i;
+			i++;
 			continue ;
 		}
-		if (r == -1)
+		if (res == -1)
 		{
 			clear_tex_paths(game);
 			free_lines(lines, nlines);
@@ -163,95 +306,32 @@ int	parse_file(const char *filename, t_game *game)
 		free_lines(lines, nlines);
 		return (set_error(ERR_MISSING_ID, "one or more identifiers missing", game));
 	}
+	map_lines = NULL;
+	map_h = 0;
+	map_w = 0;
+	if (extract_map_block(lines, nlines, i, &map_lines, &map_h, &map_w,
+			game) != 0)
+		return (cleanup_and_err(lines, nlines, map_lines, map_h, game));
+	if (map_h > MAP_H || map_w > MAP_W)
 	{
-		char **map_lines = NULL;
-		int map_h = 0;
-		int map_w = 0;
-
-		if (extract_map_block(lines, nlines, i, &map_lines, &map_h, &map_w,
-							  game) != 0)
-		{
-			clear_tex_paths(game);
-			free_lines(lines, nlines);
-			return (-1);
-		}
-		if (map_h > MAP_H || map_w > MAP_W)
-		{
-			for (int r = 0; r < map_h; ++r)
-				free(map_lines[r]);
-			free(map_lines);
-			clear_tex_paths(game);
-			free_lines(lines, nlines);
-			return (set_error(ERR_MAP_INVALID,
-				"map dimensions exceed supported MAP_W/MAP_H", game));
-		}
-		if (validate_map_block(map_lines, map_h, map_w, game) != 0)
-		{
-			for (int r = 0; r < map_h; ++r)
-				free(map_lines[r]);
-			free(map_lines);
-			clear_tex_paths(game);
-			free_lines(lines, nlines);
-			return (-1);
-		}
-		for (int y = 0; y < MAP_H; ++y)
-			for (int x = 0; x < MAP_W; ++x)
-				game->map[y][x] = 1;
-
-		for (int y = 0; y < map_h; ++y)
-		{
-			for (int x = 0; x < map_w; ++x)
-			{
-				char c = (x < (int)strlen(map_lines[y])) ? map_lines[y][x] : ' ';
-				if (c == '1')
-					game->map[y][x] = 1;
-				else if (c == '0')
-					game->map[y][x] = 0;
-				else if (c == ' ')
-					game->map[y][x] = 1;
-				else if (c == 'N' || c == 'S' || c == 'E' || c == 'W')
-				{
-					game->map[y][x] = 0;
-					game->p.posX = x + 0.5;
-					game->p.posY = y + 0.5;
-					if (c == 'N')
-					{
-						game->p.dirX = -1;
-						game->p.dirY = 0;
-						game->p.planeX = 0;
-						game->p.planeY = 0.66;
-					}
-					if (c == 'S')
-					{
-						game->p.dirX = 1;
-						game->p.dirY = 0;
-						game->p.planeX = 0;
-						game->p.planeY = -0.66;
-					}
-					if (c == 'W')
-					{
-						game->p.dirX = 0;
-						game->p.dirY = -1;
-						game->p.planeX = -0.66;
-						game->p.planeY = 0;
-					}
-					if (c == 'E')
-					{
-						game->p.dirX = 0;
-						game->p.dirY = 1;
-						game->p.planeX = 0.66;
-						game->p.planeY = 0;
-					}
-				}
-				else
-					game->map[y][x] = 1;
-			}
-		}
-
-		for (int r = 0; r < map_h; ++r)
-			free(map_lines[r]);
-		free(map_lines);
+		free_map_lines(map_lines, map_h);
+		clear_tex_paths(game);
+		free_lines(lines, nlines);
+		return (set_error(ERR_MAP_INVALID,
+					"map dimensions exceed supported MAP_W/MAP_H", game));
 	}
+	if (validate_map_block(map_lines, map_h, map_w, game) != 0)
+	{
+		free_map_lines(map_lines, map_h);
+		return (cleanup_and_err(lines, nlines, NULL, 0, game));
+	}
+	set_map_all_ones(game);
+	if (load_map_into_grid(map_lines, map_h, map_w, game) != 0)
+	{
+		free_map_lines(map_lines, map_h);
+		return (cleanup_and_err(lines, nlines, NULL, 0, game));
+	}
+	free_map_lines(map_lines, map_h);
 	free_lines(lines, nlines);
 	return (0);
 }
