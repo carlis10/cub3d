@@ -1,27 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   safe_alloc.c                                       :+:      :+:    :+:   */
+/*   draw_text_aux.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/22 14:24:09 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:59:17 by carlos           ###   ########.fr       */
+/*   Created: 2025/11/22 13:29:56 by carlos            #+#    #+#             */
+/*   Updated: 2025/11/22 13:41:53 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include "../include/error.h"
+#include "../include/cub3d.h"
 
-void	*xmalloc(size_t size, t_game *game)
+double	d_aux(int map, double pos, int step, double ray_dir)
 {
-	void *p;
-
-	p = malloc(size);
-	if (!p)
-	{
-		set_error(ERR_MALLOC, "malloc failed", game);
-		return (NULL);
-	}
-	return (p);
+	if (ray_dir == 0)
+		return (1e-6);
+	return ((map - pos + (1 - step) / 2.0) / ray_dir);
 }

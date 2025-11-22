@@ -6,24 +6,27 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:28:23 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/17 16:17:10 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/19 17:51:42 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
-uint32_t get_tex_pixel(mlx_texture_t *tex, int x, int y)
+uint32_t	get_tex_pixel(mlx_texture_t *tex, int x, int y)
 {
+	int		idx;
+	uint8_t	*px;
+
 	if (!tex)
 		return (0xFFFFFFFF);
 	x = (x % tex->width + tex->width) % tex->width;
 	y = (y % tex->height + tex->height) % tex->height;
-	int idx = (y * tex->width + x) * 4;
-	uint8_t *px = &tex->pixels[idx];
+	idx = (y * tex->width + x) * 4;
+	px = &tex->pixels[idx];
 	return ((px[0] << 24) | (px[1] << 16) | (px[2] << 8) | px[3]);
 }
 
-void check_texture(mlx_texture_t *tex, const char *name)
+void	check_texture(mlx_texture_t *tex, const char *name)
 {
 	if (!tex)
 	{
@@ -33,27 +36,43 @@ void check_texture(mlx_texture_t *tex, const char *name)
 	printf("✅ Cargada: %s (%dx%d)\n", name, tex->width, tex->height);
 }
 
-void draw_background(t_game *g)
+void	draw_background(t_game *g)
 {
-	for (int y = 0; y < HEIGHT; y++)
+	uint32_t	color;
+	int			y;
+	int			x;
+
+	y = 0;
+	x = 0;
+	while (y < HEIGHT)
 	{
-		uint32_t color = (y < HEIGHT / 2) ? 0x87CEEBFF : 0x222222FF;
-		for (int x = 0; x < WIDTH; x++)
+		if (y < HEIGHT / 2)
+			color = 0x87CEEBFF;
+		else
+			color = 0x222222FF;
+		while (x < WIDTH)
+		{
 			mlx_put_pixel(g->img, x, y, color);
+			x++;
+		}
+		y++;
 	}
 }
 
-mlx_texture_t *choose_wall_texture(t_game *g, int side, double rayDirX, double rayDirY)
+mlx_texture_t	*w_t(t_game *g, int side, double ray_dir_x, double ray_dir_y)
 {
-    if (side == 0)
-		if (rayDirX > 0) 
-           return (g->wallTex[0]);
+	if (side == 0)
+	{
+		if (ray_dir_x > 0)
+			return (g->wall_tex[0]);
 		else
-			return (g->wallTex[1]);
-    else
-		if (rayDirY > 0) 
-           return (g->wallTex[2]);
+			return (g->wall_tex[1]);
+	}
+	else
+	{
+		if (ray_dir_y > 0)
+			return (g->wall_tex[2]);
 		else
-			return (g->wallTex[3]);
+			return (g->wall_tex[3]);
+	}
 }
-
