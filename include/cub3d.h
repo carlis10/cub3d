@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 11:36:38 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/22 13:42:00 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/23 16:08:54 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@
 # define HEIGHT 600
 # define TEX_W 64
 # define TEX_H 64
-# define M_W 10
-# define M_H 10
 
 typedef struct s_player
 {
@@ -82,13 +80,17 @@ typedef struct s_game
 	mlx_image_t		*img;
 	mlx_t			*mlx;
 	mlx_texture_t	*wall_tex[4];
-	int				map[M_H][M_W];
+	int				floor_color;
+	int				ceil_color;
+	int				m_w;
+	int				m_h;
+	int				**map;
 }			t_game;
 
 //textures
 
 uint32_t		get_tex_pixel(mlx_texture_t *tex, int x, int y);
-void			check_texture(mlx_texture_t *tex, const char *name);
+void			check_texture(mlx_texture_t *tex);
 void			draw_background(t_game *g);
 mlx_texture_t	*w_t(t_game *g, int side, double ray_dir_x, double ray_dir_y);
 
@@ -110,5 +112,16 @@ void			move_player(t_game *g, double moveSpeed);
 void			cast_ray(t_game *g, int x);
 void			draw_scene(t_game *g);
 double			d_aux(int map, double pos, int step, double ray_dir);
+
+//parsing
+
+int	extract_map_block(char **file_lines, int nlines, int start_index,
+		char ***out_lines, int *out_h, int *out_w);
+int validate_map_block(char **map_lines, int map_h, int map_w);
+int	parse_rgb_line(const char *s, int *out_color);
+int	check_texture_path(const char *path);
+int	parse_file(const char *filename, t_game *game);
+int	parse_identifier_line(char *line, t_game *game,
+		int *have_tex, int *have_floor, int *have_ceil);
 
 #endif

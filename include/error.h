@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
+/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 14:20:32 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:38:54 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/23 15:44:14 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,16 @@ typedef enum e_error_code
 }	t_error_code;
 
 
-int		set_error(t_error_code code, const char *detail, t_game *game);
+int		set_error(t_error_code code, const char *detail);
 
 
 void	print_error(t_error_code code, const char *detail);
 
 
-void	error_exit(t_error_code code, const char *detail, t_game *game);
+void	error_exit(t_error_code code, const char *detail);
 
 
-void	*xmalloc(size_t size, t_game *game);
+void	*xmalloc(size_t size);
 
 
 void	free_game_resources(t_game *game);

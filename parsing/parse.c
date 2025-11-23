@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
+/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:58:42 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 00:38:54 by javierzarag      ###   ########.fr       */
+/*   Updated: 2025/11/23 16:09:01 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "include/cub3d.h"
-#include "include/error.h"
+#include "../include/cub3d.h"
+#include "../include/error.h"
 
 static void	free_lines(char **lines, int n)
 {
@@ -42,28 +42,28 @@ static void	clear_tex_paths(t_game *game)
 	i = 0;
 	while (i < 4)
 	{
-		if (game->tex_path[i])
+		if (game->wall_tex[i])
 		{
-			free(game->tex_path[i]);
-			game->tex_path[i] = NULL;
+			free(game->wall_tex[i]);
+			game->wall_tex[i] = NULL;
 		}
 		i++;
 	}
 }
 
 static int	read_all_lines(const char *filename, char ***out_lines,
-		int *out_count, t_game *game)
+		int *out_count)
 {
 	FILE	*f;
 	char	*line;
 	size_t	len;
-	ssize_t	nread;
+	int	nread;
 	char	**arr;
 	int		count;
 
 	f = fopen(filename, "r");
 	if (!f)
-		return (set_error(ERR_OPEN_FILE, filename, game));
+		return (set_error(ERR_OPEN_FILE, filename));
 	line = NULL;
 	len = 0;
 	arr = NULL;
@@ -81,7 +81,7 @@ static int	read_all_lines(const char *filename, char ***out_lines,
 				free(line);
 				fclose(f);
 				free_lines(arr, count);
-				return (set_error(ERR_MALLOC, "reading file", game));
+				return (set_error(ERR_MALLOC, "reading file"));
 			}
 			{
 				char **tmp;
@@ -93,7 +93,7 @@ static int	read_all_lines(const char *filename, char ***out_lines,
 					free(line);
 					fclose(f);
 					free_lines(arr, count);
-					return (set_error(ERR_MALLOC, "reading file", game));
+					return (set_error(ERR_MALLOC, "reading file"));
 				}
 				arr = tmp;
 				arr[count] = dup;
@@ -106,7 +106,7 @@ static int	read_all_lines(const char *filename, char ***out_lines,
 	if (count == 0)
 	{
 		free(arr);
-		return (set_error(ERR_READ_FILE, "file is empty", game));
+		return (set_error(ERR_READ_FILE, "file is empty"));
 	}
 	*out_lines = arr;
 	*out_count = count;
@@ -127,7 +127,7 @@ static int	has_cub_ext(const char *name)
 
 static void	free_map_lines(char **map, int h)
 {
-	int i;
+	int	i;
 
 	if (!map)
 		return ;
@@ -150,10 +150,10 @@ static void	set_map_all_ones(t_game *game)
 	int	x;
 
 	y = 0;
-	while (y < MAP_H)
+	while (y < game->m_h)
 	{
 		x = 0;
-		while (x < MAP_W)
+		while (x < game->m_w)
 		{
 			game->map[y][x] = 1;
 			x++;
@@ -167,57 +167,46 @@ static void	set_map_all_ones(t_game *game)
 */
 static void	place_player_from_char(t_game *game, char c, int x, int y)
 {
-	game->p.posX = (double)x + 0.5;
-	game->p.posY = (double)y + 0.5;
+	game->p.pos_x = (double)x + 0.5;
+	game->p.pos_y = (double)y + 0.5;
 	if (c == 'N')
 	{
-		game->p.dirX = -1;
-		game->p.dirY = 0;
-		game->p.planeX = 0;
-		game->p.planeY = 0.66;
+		game->p.dir_x = -1;
+		game->p.dir_y = 0;
+		game->p.plane_x = 0;
+		game->p.plane_y = 0.66;
 	}
 	else if (c == 'S')
 	{
-		game->p.dirX = 1;
-		game->p.dirY = 0;
-		game->p.planeX = 0;
-		game->p.planeY = -0.66;
+		game->p.dir_x = 1;
+		game->p.dir_y = 0;
+		game->p.plane_x = 0;
+		game->p.plane_y = -0.66;
 	}
 	else if (c == 'W')
 	{
-		game->p.dirX = 0;
-		game->p.dirY = -1;
-		game->p.planeX = -0.66;
-		game->p.planeY = 0;
+		game->p.dir_x = 0;
+		game->p.dir_y = -1;
+		game->p.plane_x = -0.66;
+		game->p.plane_y = 0;
 	}
 	else if (c == 'E')
 	{
-		game->p.dirX = 0;
-		game->p.dirY = 1;
-		game->p.planeX = 0.66;
-		game->p.planeY = 0;
+		game->p.dir_x = 0;
+		game->p.dir_y = 1;
+		game->p.plane_x = 0.66;
+		game->p.plane_y = 0;
 	}
 }
 
 static int	load_map_into_grid(char **map_lines, int map_h, int map_w,
 		t_game *game)
 {
-	int	y;
-	int	x;
-	int	len;
+	int		y;
+	int		x;
+	int		len;
 	char	c;
 
-	y = 0;
-	while (y < MAP_H)
-	{
-		x = 0;
-		while (x < MAP_W)
-		{
-			game->map[y][x] = 1;
-			x++;
-		}
-		y++;
-	}
 	y = 0;
 	while (y < map_h)
 	{
@@ -273,10 +262,10 @@ int	parse_file(const char *filename, t_game *game)
 	int		map_w;
 
 	if (!has_cub_ext(filename))
-		return (set_error(ERR_BAD_EXTENSION, filename, game));
+		return (set_error(ERR_BAD_EXTENSION, filename));
 	lines = NULL;
 	nlines = 0;
-	res = read_all_lines(filename, &lines, &nlines, game);
+	res = read_all_lines(filename, &lines, &nlines);
 	if (res != 0)
 		return (-1);
 	have_floor = 0;
@@ -304,23 +293,14 @@ int	parse_file(const char *filename, t_game *game)
 	{
 		clear_tex_paths(game);
 		free_lines(lines, nlines);
-		return (set_error(ERR_MISSING_ID, "one or more identifiers missing", game));
+		return (set_error(ERR_MISSING_ID, "one or more identifiers missing"));
 	}
 	map_lines = NULL;
 	map_h = 0;
 	map_w = 0;
-	if (extract_map_block(lines, nlines, i, &map_lines, &map_h, &map_w,
-			game) != 0)
+	if (extract_map_block(lines, nlines, i, &map_lines, &map_h, &map_w) != 0)
 		return (cleanup_and_err(lines, nlines, map_lines, map_h, game));
-	if (map_h > MAP_H || map_w > MAP_W)
-	{
-		free_map_lines(map_lines, map_h);
-		clear_tex_paths(game);
-		free_lines(lines, nlines);
-		return (set_error(ERR_MAP_INVALID,
-					"map dimensions exceed supported MAP_W/MAP_H", game));
-	}
-	if (validate_map_block(map_lines, map_h, map_w, game) != 0)
+	if (validate_map_block(map_lines, map_h, map_w) != 0)
 	{
 		free_map_lines(map_lines, map_h);
 		return (cleanup_and_err(lines, nlines, NULL, 0, game));

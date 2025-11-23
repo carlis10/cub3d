@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:28:23 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/19 17:51:42 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/23 15:34:34 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,13 @@ uint32_t	get_tex_pixel(mlx_texture_t *tex, int x, int y)
 	return ((px[0] << 24) | (px[1] << 16) | (px[2] << 8) | px[3]);
 }
 
-void	check_texture(mlx_texture_t *tex, const char *name)
+void	check_texture(mlx_texture_t *tex)
 {
 	if (!tex)
 	{
-		fprintf(stderr, "❌ Error: no se pudo cargar %s\n", name);
+		fprintf(stderr, " Error: no se pudo cargar la textura\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("✅ Cargada: %s (%dx%d)\n", name, tex->width, tex->height);
 }
 
 void	draw_background(t_game *g)

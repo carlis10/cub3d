@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 14:22:00 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/22 14:59:33 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/23 15:43:36 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,8 @@ static const char *g_err_strings[] = {
 	"Internal error"
 };
 
-int	set_error(t_error_code code, const char *detail, t_game *game)
+int	set_error(t_error_code code, const char *detail)
 {
-	(void)game;
 	if (code <= ERR_NONE || code > ERR_INTERNAL)
 		code = ERR_INTERNAL;
 	(void)detail;
@@ -54,7 +53,7 @@ void	print_error(t_error_code code, const char *detail)
 	fprintf(stderr, "\n");
 }
 
-void	error_exit(t_error_code code, const char *detail, t_game *game)
+void	error_exit(t_error_code code, const char *detail)
 {
 	print_error(code, detail);
 }
