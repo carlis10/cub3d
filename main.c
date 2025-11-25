@@ -6,12 +6,11 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/15 11:39:07 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/23 15:32:49 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:32:15 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "include/cub3d.h"
-
 
 int	main(int argc, char **argv)
 {

@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:57:01 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 16:08:46 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 14:29:17 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,3 +60,33 @@ int validate_map_block(char **map_lines, int map_h, int map_w)
 		return set_error(ERR_PLAYER_COUNT, "exactly one player required");
 	return 0;
 }
+
+int alloc_map(t_game *game, int map_h, int map_w)
+{
+    game->m_h = map_h;
+    game->m_w = map_w;
+
+    game->map = malloc(sizeof(int *) * map_h);
+    if (!game->map)
+        return -1;
+
+    for (int y = 0; y < map_h; y++)
+    {
+        game->map[y] = malloc(sizeof(int) * map_w);
+        if (!game->map[y])
+            return -1;
+        for (int x = 0; x < map_w; x++)
+            game->map[y][x] = 1; // inicializa seguro
+    }
+    return 0;
+}
+
+int	my_isspace(char c)
+{
+    return (c == ' '  || c == '\t' ||
+            c == '\n' || c == '\r' ||
+            c == '\v' || c == '\f');
+}
+
+
+

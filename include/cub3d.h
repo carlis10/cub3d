@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 11:36:38 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/23 16:08:54 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 14:29:10 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,5 +123,7 @@ int	check_texture_path(const char *path);
 int	parse_file(const char *filename, t_game *game);
 int	parse_identifier_line(char *line, t_game *game,
 		int *have_tex, int *have_floor, int *have_ceil);
+int	alloc_map(t_game *game, int map_h, int map_w);
+int my_isspace(char c);
 
 #endif

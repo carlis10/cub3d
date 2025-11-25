@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 11:35:21 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/19 17:56:45 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:31:20 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,10 @@ void	draw_floor_sky(t_game *g, int x)
 			continue ;
 		if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
 		{
-			mlx_put_pixel(g->img, x, y, 0);
+			mlx_put_pixel(g->img, x, y, g->floor_color);
 			sky_y = HEIGHT - y;
 			if (sky_y >= 0 && sky_y < HEIGHT)
-				mlx_put_pixel(g->img, x, sky_y, 0);
+				mlx_put_pixel(g->img, x, sky_y, g->ceil_color);
 		}
 		y++;
 	}

@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:57:48 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 16:06:02 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:32:59 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,23 +67,28 @@ static int	append_map_line(char ***map, int *h, const char *src)
 static int	process_map_lines(char **file_lines, int nlines, int start,
 		char ***map, int *map_h, int *map_w)
 {
-	int	i;
-	int	len;
+	int i = start;
 
-	i = start;
 	while (i < nlines)
 	{
+		// si empieza el mapa y aparece una linea en blanco → el mapa termina.
 		if (is_blank_line(file_lines[i]))
-			return (set_error(ERR_MAP_INVALID, "empty line inside map"));
-		len = (int)strlen(file_lines[i]);
+			break;
+
+		int len = strlen(file_lines[i]);
 		if (len > *map_w)
 			*map_w = len;
+
+        // añade la línea al mapa
 		if (append_map_line(map, map_h, file_lines[i]) != 0)
 			return (free_map_lines(*map, *map_h));
+
 		i++;
 	}
+
 	return (0);
 }
+
 
 int	extract_map_block(char **file_lines, int nlines, int start_index,
 		char ***out_lines, int *out_h, int *out_w)

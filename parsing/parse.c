@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:58:42 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 16:09:01 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:26:19 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,10 @@ int	parse_file(const char *filename, t_game *game)
 			free_lines(lines, nlines);
 			return (-1);
 		}
-		break ;
+		if (have_tex[0] && have_tex[1] && have_tex[2] && have_tex[3]
+		&& have_floor && have_ceil)
+			break ;
+		i++;
 	}
 	if (!have_tex[0] || !have_tex[1] || !have_tex[2] || !have_tex[3]
 		|| !have_floor || !have_ceil)
@@ -298,9 +301,15 @@ int	parse_file(const char *filename, t_game *game)
 	map_lines = NULL;
 	map_h = 0;
 	map_w = 0;
+
 	if (extract_map_block(lines, nlines, i, &map_lines, &map_h, &map_w) != 0)
 		return (cleanup_and_err(lines, nlines, map_lines, map_h, game));
 	if (validate_map_block(map_lines, map_h, map_w) != 0)
+	{
+		free_map_lines(map_lines, map_h);
+		return (cleanup_and_err(lines, nlines, NULL, 0, game));
+	}
+	if (alloc_map(game, map_h, map_w) != 0)
 	{
 		free_map_lines(map_lines, map_h);
 		return (cleanup_and_err(lines, nlines, NULL, 0, game));

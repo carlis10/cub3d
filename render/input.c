@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:45:39 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/19 18:00:47 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:32:39 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	move_player(t_game *g, double m_spd)
 			g->p.pos_x += g->p.dir_x * m_spd;
 		if (!g->map[(int)(g->p.pos_y + g->p.dir_y * m_spd)][(int)g->p.pos_x])
 			g->p.pos_y += g->p.dir_y * m_spd;
-		printf("player x:%f\n player y:%f", g->p.pos_x, g->p.pos_y);
 	}
 	if (mlx_is_key_down(g->mlx, MLX_KEY_S))
 	{
@@ -28,7 +27,6 @@ void	move_player(t_game *g, double m_spd)
 			g->p.pos_x -= g->p.dir_x * m_spd;
 		if (!g->map[(int)(g->p.pos_y - g->p.dir_y * m_spd)][(int)g->p.pos_x])
 			g->p.pos_y -= g->p.dir_y * m_spd;
-		printf("player x:%f\n player y:%f", g->p.pos_x, g->p.pos_y);
 	}
 }
 

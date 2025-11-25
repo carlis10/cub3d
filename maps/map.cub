@@ -1,7 +1,7 @@
-NO ../pics/bluestone.png
-EA ../pics/colorstone.png
-SO ../pics/greystone.png
-WE ../pics/redbrick.png
+NO ./pics/bluestone.png
+EA ./pics/colorstone.png
+SO ./pics/greystone.png
+WE ./pics/redbrick.png
 
 C 35,19,73
 F 15,6,40

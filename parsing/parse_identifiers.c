@@ -6,20 +6,19 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:54:07 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 16:07:38 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:02:47 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include "../include/cub3d.h"
 #include "../include/error.h"
 
 
 static const char	*skip_spaces_c(const char *s)
 {
-	while (*s && isspace((unsigned char)*s))
+	while (*s && my_isspace((unsigned char)*s))
 		s++;
 	return (s);
 }
@@ -87,7 +86,6 @@ int	parse_identifier_line(char *line, t_game *game,
 		int *have_tex, int *have_floor, int *have_ceil)
 {
 	const char	*t;
-
 	t = skip_spaces_c(line);
 	if (is_texture_id(t))
 		return (parse_tex(t, game, have_tex));
