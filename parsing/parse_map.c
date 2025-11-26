@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_map.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
+/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:57:48 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/25 16:32:59 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/26 20:23:16 by javierzarag      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,51 +44,81 @@ static int	free_map_lines(char **map, int h)
 	return (-1);
 }
 
-static int	append_map_line(char ***map, int *h, const char *src)
+static int	alloc_map_array(char ***map, int h, char *dup)
 {
 	char	**tmp;
-	char	*dup;
 
-	dup = strdup(src);
-	if (!dup)
-		return (set_error(ERR_MALLOC, "map duplicate"));
-	tmp = realloc(*map, sizeof(char *) * (*h + 1));
+	tmp = realloc(*map, sizeof(char *) * (h + 1));
 	if (!tmp)
 	{
 		free(dup);
 		return (set_error(ERR_MALLOC, "map lines"));
 	}
 	*map = tmp;
+	return (0);
+}
+
+static int	append_map_line(char ***map, int *h, const char *src)
+{
+	char	*dup;
+
+	dup = strdup(src);
+	if (!dup)
+		return (set_error(ERR_MALLOC, "map duplicate"));
+	if (alloc_map_array(map, *h, dup) != 0)
+		return (-1);
 	(*map)[*h] = dup;
 	(*h)++;
+	return (0);
+}
+
+static int	update_map_width(const char *line, int *map_w)
+{
+	int	len;
+
+	len = strlen(line);
+	if (len > *map_w)
+		*map_w = len;
+	return (0);
+}
+
+static int	handle_map_line(char ***map, int *map_h,
+		int *map_w, const char *line)
+{
+	if (update_map_width(line, map_w) != 0)
+		return (-1);
+	if (append_map_line(map, map_h, line) != 0)
+		return (-1);
 	return (0);
 }
 
 static int	process_map_lines(char **file_lines, int nlines, int start,
 		char ***map, int *map_h, int *map_w)
 {
-	int i = start;
+	int	i;
 
+	i = start;
 	while (i < nlines)
 	{
-		// si empieza el mapa y aparece una linea en blanco → el mapa termina.
 		if (is_blank_line(file_lines[i]))
 			break;
-
-		int len = strlen(file_lines[i]);
-		if (len > *map_w)
-			*map_w = len;
-
-        // añade la línea al mapa
-		if (append_map_line(map, map_h, file_lines[i]) != 0)
+		if (handle_map_line(map, map_h, map_w, file_lines[i]) != 0)
 			return (free_map_lines(*map, *map_h));
-
 		i++;
 	}
-
 	return (0);
 }
 
+static int	skip_initial_blank(char **file_lines,
+		int nlines, int *i)
+{
+	while (*i < nlines && is_blank_line(file_lines[*i]))
+		(*i)++;
+	if (*i >= nlines)
+		return (set_error(ERR_MAP_INVALID,
+				"map missing after identifiers"));
+	return (0);
+}
 
 int	extract_map_block(char **file_lines, int nlines, int start_index,
 		char ***out_lines, int *out_h, int *out_w)
@@ -102,11 +132,8 @@ int	extract_map_block(char **file_lines, int nlines, int start_index,
 	map_lines = NULL;
 	map_h = 0;
 	map_w = 0;
-	while (i < nlines && is_blank_line(file_lines[i]))
-		i++;
-	if (i >= nlines)
-		return (set_error(ERR_MAP_INVALID,
-				"map missing after identifiers"));
+	if (skip_initial_blank(file_lines, nlines, &i) != 0)
+		return (-1);
 	if (process_map_lines(file_lines, nlines, i,
 			&map_lines, &map_h, &map_w) != 0)
 		return (-1);

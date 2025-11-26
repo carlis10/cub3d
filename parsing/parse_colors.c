@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_colors.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
+/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:55:17 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 16:04:32 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/26 20:23:16 by javierzarag      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,8 @@ static const char	*skip_spaces(const char *p)
 	return (p);
 }
 
-static int	parse_single_val(const char **p, const char *src)
+static int	parse_digits(int val, const char **p, const char *src)
 {
-	int	val;
-
-	val = 0;
-	if (!isdigit((unsigned char)**p))
-		return (set_error(ERR_COLOR_FORMAT, src));
 	while (**p && isdigit((unsigned char)**p))
 	{
 		val = (val * 10) + (**p - '0');
@@ -40,6 +35,17 @@ static int	parse_single_val(const char **p, const char *src)
 	return (val);
 }
 
+static int	parse_single_val(const char **p, const char *src)
+{
+	int	val;
+
+	val = 0;
+	if (!isdigit((unsigned char)**p))
+		return (set_error(ERR_COLOR_FORMAT, src));
+	val = parse_digits(val, p, src);
+	return (val);
+}
+
 static int	validate_end(const char *p, const char *src)
 {
 	while (*p)
@@ -47,6 +53,24 @@ static int	validate_end(const char *p, const char *src)
 		if (!isspace((unsigned char)*p))
 			return (set_error(ERR_COLOR_FORMAT, src));
 		p++;
+	}
+	return (0);
+}
+
+static int	parse_component(int *out, const char **p, const char *s, int idx)
+{
+	int	val;
+
+	val = parse_single_val(p, s);
+	if (val < 0)
+		return (-1);
+	out[idx] = val;
+	if (idx < 2)
+	{
+		if (**p != ',')
+			return (set_error(ERR_COLOR_FORMAT, s));
+		(*p)++;
+		*p = skip_spaces(*p);
 	}
 	return (0);
 }
@@ -63,20 +87,15 @@ int	parse_rgb_line(const char *s, int *out_color)
 	i = 0;
 	while (i < 3)
 	{
-		vals[i] = parse_single_val(&p, s);
-		if (vals[i] < 0)
+		if (parse_component(vals, &p, s, i) < 0)
 			return (-1);
-		if (i < 2)
-		{
-			if (*p != ',')
-				return (set_error(ERR_COLOR_FORMAT, s));
-			p++;
-			p = skip_spaces(p);
-		}
 		i++;
 	}
 	if (validate_end(p, s) < 0)
 		return (-1);
-	*out_color = (vals[0] << 24) | (vals[1] << 16) | (vals[2] << 8) | 0xFF;
+	*out_color = (vals[0] << 24)
+		| (vals[1] << 16)
+		| (vals[2] << 8)
+		| 0xFF;
 	return (0);
 }

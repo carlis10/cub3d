@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_textures.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
+/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:56:14 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/25 15:16:48 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/26 20:23:16 by javierzarag      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ static int	open_test(const char *path)
 {
 	int	f;
 
-	f = open(path, 0);
-	if (!f)
+	f = open(path, O_RDONLY);
+	if (f < 0)
 		return (set_error(ERR_TEXTURE_OPEN, path));
 	close(f);
 	return (0);
@@ -31,7 +31,7 @@ static int	open_test(const char *path)
 int	check_texture_path(const char *path)
 {
 	if (!path || !*path)
-		return (set_error(ERR_TEXTURE_OPEN, "emptylspath"));
+		return (set_error(ERR_TEXTURE_OPEN, "empty path"));
 	if (open_test(path) != 0)
 		return (-1);
 	return (0);

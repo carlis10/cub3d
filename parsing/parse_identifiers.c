@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_identifiers.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
+/*   By: javierzaragozatejeda <javierzaragozatej    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:54:07 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/25 16:02:47 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/26 20:23:16 by javierzarag      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,22 +23,25 @@ static const char	*skip_spaces_c(const char *s)
 	return (s);
 }
 
-static int	set_texture_path(t_game *game, const char *path, int idx)
+static int	load_texture_into_game(t_game *game, const char *path, int idx)
 {
 	mlx_texture_t	*text;
 
-	if (check_texture_path(path) != 0)
-		return (-1);
 	text = mlx_load_png(path);
 	check_texture(text);
 	game->wall_tex[idx] = text;
 	return (0);
 }
 
-static int	parse_tex(const char *t, t_game *game, int *have_tex)
+static int	set_texture_path(t_game *game, const char *path, int idx)
 {
-	const char	*path;
+	if (check_texture_path(path) != 0)
+		return (-1);
+	return (load_texture_into_game(game, path, idx));
+}
 
+static int	check_dup_texture(int *have_tex, const char *t)
+{
 	if (have_tex[0] && t[0] == 'N' && t[1] == 'O')
 		return (set_error(ERR_DUP_ID, "NO"));
 	if (have_tex[1] && t[0] == 'S' && t[1] == 'O')
@@ -47,16 +50,41 @@ static int	parse_tex(const char *t, t_game *game, int *have_tex)
 		return (set_error(ERR_DUP_ID, "WE"));
 	if (have_tex[3] && t[0] == 'E' && t[1] == 'A')
 		return (set_error(ERR_DUP_ID, "EA"));
+	return (0);
+}
+
+static int	assign_texture(t_game *game,
+		const char *path, int *have_tex, const char *t)
+{
+	if (t[0] == 'N')
+	{
+		have_tex[0] = 1;
+		return (set_texture_path(game, path, 0));
+	}
+	if (t[0] == 'S')
+	{
+		have_tex[1] = 1;
+		return (set_texture_path(game, path, 1));
+	}
+	if (t[0] == 'W')
+	{
+		have_tex[2] = 1;
+		return (set_texture_path(game, path, 2));
+	}
+	have_tex[3] = 1;
+	return (set_texture_path(game, path, 3));
+}
+
+static int	parse_tex(const char *t, t_game *game, int *have_tex)
+{
+	const char	*path;
+
+	if (check_dup_texture(have_tex, t) != 0)
+		return (-1);
 	path = skip_spaces_c(t + 2);
 	if (*path == '\0')
 		return (set_error(ERR_TEXTURE_OPEN, "empty path"));
-	if (t[0] == 'N')
-		return (have_tex[0] = 1, set_texture_path(game, path, 0));
-	if (t[0] == 'S')
-		return (have_tex[1] = 1, set_texture_path(game, path, 1));
-	if (t[0] == 'W')
-		return (have_tex[2] = 1, set_texture_path(game, path, 2));
-	return (have_tex[3] = 1, set_texture_path(game, path, 3));
+	return (assign_texture(game, path, have_tex, t));
 }
 
 static int	is_texture_id(const char *t)
@@ -68,13 +96,23 @@ static int	is_texture_id(const char *t)
 	return (0);
 }
 
-static int	parse_color(const char *t,
-		int *have_color, int *dst)
+static int	check_color_dup(const char *t, int *have_color)
+{
+	if (*have_color)
+	{
+		if (t[0] == 'F')
+			return (set_error(ERR_DUP_ID, "F"));
+		return (set_error(ERR_DUP_ID, "C"));
+	}
+	return (0);
+}
+
+static int	parse_color(const char *t, int *have_color, int *dst)
 {
 	const char	*args;
 
-	if (*have_color)
-		return (set_error(ERR_DUP_ID, t[0] == 'F' ? "F" : "C"));
+	if (check_color_dup(t, have_color) != 0)
+		return (-1);
 	args = skip_spaces_c(t + 1);
 	if (parse_rgb_line(args, dst) != 0)
 		return (-1);
@@ -86,6 +124,7 @@ int	parse_identifier_line(char *line, t_game *game,
 		int *have_tex, int *have_floor, int *have_ceil)
 {
 	const char	*t;
+
 	t = skip_spaces_c(line);
 	if (is_texture_id(t))
 		return (parse_tex(t, game, have_tex));
