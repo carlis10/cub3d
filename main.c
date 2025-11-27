@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/15 11:39:07 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/27 01:45:54 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 06:34:45 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,8 @@ int	main(int argc, char **argv)
 		return (1);
 	game.img = mlx_new_image(game.mlx, WIDTH, HEIGHT);
 	mlx_image_to_window(game.mlx, game.img, 0, 0);
-
 	mlx_loop_hook(game.mlx, hook, &game);
 	mlx_loop(game.mlx);
 	mlx_terminate(game.mlx);
 	return (0);
 }
-
-
