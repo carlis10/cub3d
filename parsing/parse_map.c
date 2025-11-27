@@ -6,11 +6,10 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:57:48 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/27 04:39:19 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 06:31:09 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#define _GNU_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -35,7 +34,7 @@ int	append_map_line(t_game *g, const char *src)
 	char	**tmp;
 	char	*dup;
 
-	dup = strdup(src);
+	dup = ft_strdup(src);
 	if (!dup)
 		return (set_error(ERR_MALLOC, "map duplicate"));
 	tmp = realloc(g->map_lines, sizeof(char *) * (g->m_h + 1));
