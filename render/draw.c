@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:33:28 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/23 15:26:28 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 01:05:13 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ int	dda_loop(t_game *g)
 			g->r.m_y += g->r.step_y;
 			g->r.side = 1;
 		}
-		if (g->r.m_x < 0 || g->r.m_x >= g->m_w || g->r.m_y < 0 || g->r.m_y >= g->m_h)
+		if (check_hit(g) == 0)
 		{
 			g->r.hit = 0;
 			break ;

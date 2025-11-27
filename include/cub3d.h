@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/17 11:36:38 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/25 14:29:10 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 04:43:57 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <math.h>
 # include <stdlib.h>
 # include <stdio.h>
+# include "../libft/libft.h"
 
 # define WIDTH 800
 # define HEIGHT 600
@@ -82,6 +83,10 @@ typedef struct s_game
 	mlx_texture_t	*wall_tex[4];
 	int				floor_color;
 	int				ceil_color;
+	int				have_tex[4];
+	int				have_floor;
+	int				have_ceil;
+	char			**map_lines;
 	int				m_w;
 	int				m_h;
 	int				**map;
@@ -112,18 +117,36 @@ void			move_player(t_game *g, double moveSpeed);
 void			cast_ray(t_game *g, int x);
 void			draw_scene(t_game *g);
 double			d_aux(int map, double pos, int step, double ray_dir);
+int				check_hit(t_game *g);
 
 //parsing
 
-int	extract_map_block(char **file_lines, int nlines, int start_index,
-		char ***out_lines, int *out_h, int *out_w);
-int validate_map_block(char **map_lines, int map_h, int map_w);
-int	parse_rgb_line(const char *s, int *out_color);
-int	check_texture_path(const char *path);
-int	parse_file(const char *filename, t_game *game);
-int	parse_identifier_line(char *line, t_game *game,
-		int *have_tex, int *have_floor, int *have_ceil);
-int	alloc_map(t_game *game, int map_h, int map_w);
-int my_isspace(char c);
+int				extract_m_b(char **f_l, int nlines, int s_i, t_game *g);
+int				validate_map_block(char **map_lines, t_game *g);
+int				parse_rgb_line(const char *s, int *out_color);
+int				check_texture_path(const char *path);
+int				parse_identifier_line(char *line, t_game *game);
+int				alloc_map(t_game *game, int map_h, int map_w);
+int				my_isspace(char c);
+char			get_char_map(int y, int x, char **map_lines);
+int				p_count(char c);
+int				check_limits_map(int ny, int nx, t_game *g, char **map_lines);
+int				parse_color(const char *t, int *have_color, int *dst);
+int				is_texture_id(const char *t);
+int				parse_tex(const char *t, t_game *game);
+const char		*skip_spaces_c(const char *s);
+void			init_tex_color(t_game *game);
+int				parse_file(const char *filename, t_game *game);
+int				count_player(t_game *g, int y, char **map_lines);
+int				validate_edge_map(t_game *g, int y, int x, char **map_lines);
+int				read_all_l(const char *fname, char ***out_lines, int *out_c);
+void			free_lines(char **lines, int n);
+void			clear_tex_paths(t_game *game);
+int				has_cub_ext(const char *name);
+void			free_map_lines(char **map, int h);
+void			set_map_all_ones(t_game *game);
+void			place_player_from_char(t_game *game, char c, int x, int y);
+int				load_map_into_grid(t_game *game);
+int				cleanup_and_err(char **lines, int nlines, t_game *game);
 
 #endif

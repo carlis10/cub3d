@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 19:57:48 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/25 16:32:59 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 04:39:19 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "../include/error.h"
 #include "../include/cub3d.h"
 
-static int	is_blank_line(const char *s)
+int	is_blank_line(const char *s)
 {
 	if (!s)
 		return (1);
@@ -30,21 +30,7 @@ static int	is_blank_line(const char *s)
 	return (1);
 }
 
-static int	free_map_lines(char **map, int h)
-{
-	int	i;
-
-	i = 0;
-	while (i < h)
-	{
-		free(map[i]);
-		i++;
-	}
-	free(map);
-	return (-1);
-}
-
-static int	append_map_line(char ***map, int *h, const char *src)
+int	append_map_line(t_game *g, const char *src)
 {
 	char	**tmp;
 	char	*dup;
@@ -52,71 +38,59 @@ static int	append_map_line(char ***map, int *h, const char *src)
 	dup = strdup(src);
 	if (!dup)
 		return (set_error(ERR_MALLOC, "map duplicate"));
-	tmp = realloc(*map, sizeof(char *) * (*h + 1));
+	tmp = realloc(g->map_lines, sizeof(char *) * (g->m_h + 1));
 	if (!tmp)
 	{
 		free(dup);
 		return (set_error(ERR_MALLOC, "map lines"));
 	}
-	*map = tmp;
-	(*map)[*h] = dup;
-	(*h)++;
+	g->map_lines = tmp;
+	(g->map_lines)[g->m_h] = dup;
+	g->m_h++;
 	return (0);
 }
 
-static int	process_map_lines(char **file_lines, int nlines, int start,
-		char ***map, int *map_h, int *map_w)
-{
-	int i = start;
-
-	while (i < nlines)
-	{
-		// si empieza el mapa y aparece una linea en blanco → el mapa termina.
-		if (is_blank_line(file_lines[i]))
-			break;
-
-		int len = strlen(file_lines[i]);
-		if (len > *map_w)
-			*map_w = len;
-
-        // añade la línea al mapa
-		if (append_map_line(map, map_h, file_lines[i]) != 0)
-			return (free_map_lines(*map, *map_h));
-
-		i++;
-	}
-
-	return (0);
-}
-
-
-int	extract_map_block(char **file_lines, int nlines, int start_index,
-		char ***out_lines, int *out_h, int *out_w)
+int	process_map_lines(char **file_lines, int nlines, int start, t_game *g)
 {
 	int		i;
-	char	**map_lines;
-	int		map_h;
-	int		map_w;
+	int		len;
 
-	i = start_index;
-	map_lines = NULL;
-	map_h = 0;
-	map_w = 0;
-	while (i < nlines && is_blank_line(file_lines[i]))
+	i = start;
+	while (i < nlines)
+	{
+		if (is_blank_line(file_lines[i]))
+			break ;
+		len = strlen(file_lines[i]);
+		if (len > g->m_w)
+			g->m_w = len;
+		if (append_map_line(g, file_lines[i]) != 0)
+		{
+			free_map_lines(g->map_lines, g->m_h);
+			return (-1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+int	extract_m_b(char **f_l, int nlines, int s_i, t_game *g)
+{
+	int		i;
+
+	i = s_i;
+	g->m_h = 0;
+	g->m_w = 0;
+	while (i < nlines && is_blank_line(f_l[i]))
 		i++;
 	if (i >= nlines)
 		return (set_error(ERR_MAP_INVALID,
 				"map missing after identifiers"));
-	if (process_map_lines(file_lines, nlines, i,
-			&map_lines, &map_h, &map_w) != 0)
+	if (process_map_lines(f_l, nlines, i, g) != 0)
 		return (-1);
-	if (map_h == 0)
+	if (g->m_h == 0)
 	{
-		free(map_lines);
+		free(g->map_lines);
 		return (set_error(ERR_MAP_INVALID, "map missing"));
 	}
-	*out_lines = map_lines;
-	*out_h = map_h;
-	*out_w = map_w;
 	return (0);
 }

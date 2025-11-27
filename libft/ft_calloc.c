@@ -1,27 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   safe_alloc.c                                       :+:      :+:    :+:   */
+/*   ft_calloc.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
+/*   By: Carlos <Carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/22 14:24:09 by javierzarag       #+#    #+#             */
-/*   Updated: 2025/11/23 15:44:02 by carlos           ###   ########.fr       */
+/*   Created: 2023/09/14 13:21:09 by cravegli          #+#    #+#             */
+/*   Updated: 2023/09/22 14:28:58 by Carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include "../include/error.h"
+#include "libft.h"
 
-void	*xmalloc(size_t size)
+void	*ft_calloc(size_t count, size_t size)
 {
-	void	*p;
+	void	*m;
 
-	p = malloc(size);
-	if (!p)
-	{
-		set_error(ERR_MALLOC, "malloc failed");
+	m = (void *)malloc(count * size);
+	if (!m)
 		return (NULL);
-	}
-	return (p);
+	ft_bzero(m, count * size);
+	return (m);
 }

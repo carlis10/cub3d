@@ -6,7 +6,7 @@
 /*   By: carlos <carlos@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 11:28:23 by carlos            #+#    #+#             */
-/*   Updated: 2025/11/25 14:51:07 by carlos           ###   ########.fr       */
+/*   Updated: 2025/11/27 06:05:32 by carlos           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,15 +63,15 @@ mlx_texture_t	*w_t(t_game *g, int side, double ray_dir_x, double ray_dir_y)
 	if (side == 0)
 	{
 		if (ray_dir_x > 0)
-			return (g->wall_tex[0]);
+			return (g->wall_tex[2]);
 		else
-			return (g->wall_tex[1]);
+			return (g->wall_tex[3]);
 	}
 	else
 	{
 		if (ray_dir_y > 0)
-			return (g->wall_tex[2]);
+			return (g->wall_tex[1]);
 		else
-			return (g->wall_tex[3]);
+			return (g->wall_tex[0]);
 	}
 }

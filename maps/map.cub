@@ -1,16 +1,17 @@
 NO ./pics/bluestone.png
 EA ./pics/colorstone.png
-SO ./pics/greystone.png
-WE ./pics/redbrick.png
+WE ./pics/greystone.png
+SO ./pics/redbrick.png
 
 C 35,19,73
-F 15,6,40
+F 15,6,42
+
 
 111111111111111
 111111000111111
 111110000011111
-1111000N0001111
-111000000000111
+111100000001111
+1110000N0000111
 110000000000011
 100001111100001
 110000111000011
